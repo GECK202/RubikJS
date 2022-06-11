@@ -63,7 +63,7 @@ class cube_t:
 			swap(self.ep, E)
 			swap(self.eo, E)
 	
-	def copyCube():
+	def copyCube(self):
             copyC = cube_t()
             copyC.cp = list(self.cp)
             copyC.co = list(self.co)

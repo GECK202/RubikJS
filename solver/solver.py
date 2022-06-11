@@ -3,7 +3,8 @@ from solver.rubic import cube_t, rotateCube
 from solver.top import solvTop, solvTop2
 from solver.midl import solvMidl
 from solver.bottom import solvBottom, solvBottom2
-from itertools import combinations
+from itertools import permutations
+from time import time
 
 
 def restrictSolv(solv):
@@ -28,16 +29,23 @@ def solver3(a):
 	cube = cube_t()
 	rotateCube(cube, a.upper())
 	len_des = 100000
-	for solvTop_comb_edg in  combinations([4,5,6,7], 4):
-		for solvTop_comb_con in  combinations([4,5,6,7], 4):
-			for solvMidl_comb_con in  combinations([0,1,2,3], 4):
-				for solvBottom_comb_con in  combinations([0,1,2,3], 4):
-					cube_x = cube.copy()
-					solv = restrictSolv(solvTop(cube_x,solvTop_comb_edg,solvTop_comb_con).strip()+" "+solvMidl(cube_x,solvMidl_comb_con).strip()+" "+solvBottom(cube_x,solvBottom_comb_con).strip()).strip()
-					x = solv.count(' ')
+	solv_ret = ''
+	start = time()
+	for top_edg in  permutations([4,5,6,7], 4):
+		for top_con in  permutations([4,5,6,7], 4):
+			for midl_edg in  permutations([0,1,2,3], 4):
+				for bottom_con in  permutations([0,1,2,3], 4):
+					cube_x = cube.copyCube()
+					try:
+						solv = restrictSolv(solvTop(cube_x,top_edg,top_con).strip()+" "+solvMidl(cube_x,midl_edg).strip()+" "+solvBottom(cube_x,bottom_con).strip()).strip()
+						x = solv.count(' ')
+					except:
+						continue
 					if x < len_des:
+						print(f'find more less solv with len {x} for time from start {time()-start} sec')
 						len_des = x
 						solv_ret = solv
+	print(f'all time for find solvers is {time()-start} sec')
 	return solv_ret						
 
 def solver2(a):

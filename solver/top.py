@@ -59,11 +59,11 @@ def findTopCorner(cube:cube_t, corner:int):
 			return ""
 	return solv.strip()
 
-def solvTop(cube:cube_t, edges):
+def solvTop(cube:cube_t, edges, corners):
 	if cube == None:
 		return ""
 	
-	corners = [4,5,6,7]
+	#corners = [4,5,6,7]
 	solv = rotUpFace(cube).strip()
 	for e in edges:
 		solv = solv.strip() + " " + findTopEdge(cube, e).strip()
