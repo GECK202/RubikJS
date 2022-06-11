@@ -4,7 +4,6 @@ from solver.top import solvTop, solvTop2
 from solver.midl import solvMidl
 from solver.bottom import solvBottom, solvBottom2
 from itertools import permutations
-from time import time
 
 
 def restrictSolv(solv):
@@ -25,12 +24,11 @@ def restrictSolv(solv):
 		solv = newSolv
 	return solv.strip()
 
-def solver3(a):
+def solver3_o(a):
 	cube = cube_t()
 	rotateCube(cube, a.upper())
 	len_des = 100000
-	solv_ret = ''
-	start = time()
+	solv_short = ''
 	for top_edg in  permutations([4,5,6,7], 4):
 		for top_con in  permutations([4,5,6,7], 4):
 			for midl_edg in  permutations([0,1,2,3], 4):
@@ -42,11 +40,18 @@ def solver3(a):
 					except:
 						continue
 					if x < len_des:
-						print(f'find more less solv with len {x} for time from start {time()-start} sec')
 						len_des = x
-						solv_ret = solv
-	print(f'all time for find solvers is {time()-start} sec')
-	return solv_ret						
+						solv_short = solv
+	print(solv_short)			
+
+def solver3(a):
+	cube = cube_t()
+	rotateCube(cube, a.upper())
+	try:
+		solv = restrictSolv(solvTop(cube,[4,5,6,7],[4,5,6,7]).strip()+" "+solvMidl(cube,[0,1,2,3]).strip()+" "+solvBottom(cube,[0,1,2,3]).strip()).strip()
+	except:
+		pass	
+	print(solv)		
 
 def solver2(a):
 	cube = cube_t()

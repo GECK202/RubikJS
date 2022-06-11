@@ -13,7 +13,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	//"net"
+	"time"
 )
 
 var PYTHON = "python3"
@@ -28,12 +28,13 @@ type ParseData struct {
 	Task string
 	Gen int
 	Vis bool
-	Size int 
+	Size int
+	Optim bool
 }
 
 //Парсинг аргументов командной строки
 func parseArgs(args []string) ParseData {
-	pd := ParseData{"", 0, false, 3}
+	pd := ParseData{"", 0, false, 3, false}
 	maxIndex := len(args) - 1
 	if maxIndex <= 0 {
 		return pd
@@ -47,7 +48,7 @@ func parseArgs(args []string) ParseData {
 		command := args[i]
 		if flagCom > 0 {
 			g, err := strconv.Atoi(command)
-			if err != nil { g = 0 }
+			if err != nil { g = 10 }
 			if g < 0 { g *= -1 }
 			if g > 100 { g = 100 }
 			if flagCom == 1 {pd.Gen = g}
@@ -62,6 +63,9 @@ func parseArgs(args []string) ParseData {
 			}
 			if command == "-s" {
 				flagCom = 2
+			}
+			if command == "-o" {
+				pd.Optim = true
 			}
 		}
 	}
@@ -86,13 +90,14 @@ func main() {
 	} else {
 		if pd.Task != "" {
 			solution := getSolution(pd)
-			fmt.Printf("%s %s",pd.Task, solution)
+			fmt.Printf("%s", solution)
 		}
 	}
 }
 
 //Генератор задания
 func generationTask(count int) string {
+	rand.Seed(time.Now().UnixNano())
 	face := [6]string{"U","D","F","B","L","R"}
 	dir := [3]string{"","2","'"}
 	task := ""
@@ -113,7 +118,11 @@ func generationTask(count int) string {
 func fromPy(pd ParseData) string {
 	n := fmt.Sprintf("%d",pd.Size)
 	t := strings.Replace(pd.Task, "'", "\\'", -1)
-	command := fmt.Sprintf("from solver.solver import solver%s; solver%s('%s');",n,n,t)
+	op := ""
+	if (pd.Size == 3) && (pd.Optim == true) {
+		op = "_o"
+	}
+	command := fmt.Sprintf("from solver.solver import *; solver%s%s('%s');",n,op,t)
 	cmd := exec.Command(PYTHON, "-c", command)
 	out, err := cmd.Output()
 	if err != nil {
@@ -129,7 +138,7 @@ func ajaxHandler3(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	pd := ParseData{string(data),0,true,3}
+	pd := ParseData{string(data),0,true,3,false}
 	solution := getSolution(pd)
 	sol := strings.Replace(solution, "\n", "", -1)
 	res := &TemplateData{
@@ -151,7 +160,7 @@ func ajaxHandler2(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	pd := ParseData{string(data),0,true,2}
+	pd := ParseData{string(data),0,true,2,false}
 	solution := getSolution(pd)
 	sol := strings.Replace(solution, "\n", "", -1)
 	res := &TemplateData{
