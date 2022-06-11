@@ -1,7 +1,10 @@
+from re import X
 from solver.rubic import cube_t, rotateCube
 from solver.top import solvTop, solvTop2
 from solver.midl import solvMidl
 from solver.bottom import solvBottom, solvBottom2
+from itertools import combinations
+
 
 def restrictSolv(solv):
 	dir = {	"U U'":"", "U U2":"U'", "U U":"U2", "U' U'":"U2", "U' U2":"U", "U' U":"", "U2 U":"U'", "U2 U2":"", "U2 U'":"U",
@@ -24,12 +27,18 @@ def restrictSolv(solv):
 def solver3(a):
 	cube = cube_t()
 	rotateCube(cube, a.upper())
-	x1 = cube.copy()
-	solv1 = restrictSolv(solvTop(cube,[4,5,6,7],[4,5,6,7]).strip()+" "+solvMidl(cube,[0,1,2,3]).strip()+" "+solvBottom(cube,[0,1,2,3]).strip()).strip()
-	solv2 = restrictSolv(solvTop(x1,[4,7,6,5],[7,6,5,4]).strip()+" "+solvMidl(x1,[0,1,2,3]).strip()+" "+solvBottom(x1,[0,1,2,3]).strip()).strip()
-	if len(solv1)>len(solv2)
-		print(solv1)
-		else print(solv2)
+	len_des = 100000
+	for solvTop_comb_edg in  combinations([4,5,6,7], 4):
+		for solvTop_comb_con in  combinations([4,5,6,7], 4):
+			for solvMidl_comb_con in  combinations([0,1,2,3], 4):
+				for solvBottom_comb_con in  combinations([0,1,2,3], 4):
+					cube_x = cube.copy()
+					solv = restrictSolv(solvTop(cube_x,solvTop_comb_edg,solvTop_comb_con).strip()+" "+solvMidl(cube_x,solvMidl_comb_con).strip()+" "+solvBottom(cube_x,solvBottom_comb_con).strip()).strip()
+					x = solv.count(' ')
+					if x < len_des:
+						len_des = x
+						solv_ret = solv
+	return solv_ret						
 
 def solver2(a):
 	cube = cube_t()
